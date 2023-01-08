@@ -1,0 +1,120 @@
+﻿@page "/"
+
+<style>
+    <!--untuk menentukan ukuran si kotak-->
+    .container{
+        width: 400px;
+    }
+
+    button{
+        /*untuk mementukan ukuran setiap item*/
+        width: 100px;
+        height: 100px;
+        font-size: 50px;
+    }
+</style>
+
+@*judul dihalaman browser*@
+<PageTitle>Dimana Games</PageTitle>
+
+<div class="container">
+    <div class="row">
+        @*perulangan untuk menampilkan isi dari List animal*@
+        @for (var animalNumber = 0; animalNumber < shuffledAnimals.Count; animalNumber++)
+        {
+            //mengisi variabel dengan objek dari list sesuai index
+            string animal = shuffledAnimals[animalNumber];
+            string animalDescription = $"Animal #{animalNumber}";
+
+            <div class="col-3">
+                @*menampilkan aksi jika button diklik*@
+                <button @onclick="(() => ButtonCLick(animal, animalDescription))"
+                    type="button" class="btn btn-outline-dark">
+                    @*isi list tersebut ditampilkan dalam button*@
+                    <h1>@animal</h1>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    //membuat list hewan untuk menampilkannya di halaman browser
+    List<string> animals = new List<string>()
+    {
+        "🐒","🐒",
+        "🐖","🐖",
+        "🐋","🐋",
+        "🐤","🐤",
+        "🦋","🦋",
+        "🐈","🐈",
+        "🦎","🦎",
+        "🐫","🐫"
+    };
+
+    //menginisialisasi list dengan nama shuffledAnimals
+    List<string> shuffledAnimals = new List<string>();
+
+    //membuat function untuk me-run atau menampilkan isi list
+    private void SetUpGame()
+    {
+        //memakai fungsi random
+        Random random = new Random();
+
+        //dibuat untuk mengacak urutan list
+        shuffledAnimals = animals
+        .OrderBy(item => random.Next())
+        .ToList();
+
+        //variabel untuk mengecek jumlah selesainya game agar bisa di restart kembali
+        animalFound = 0;
+    }
+
+    protected override void OnInitialized()
+    {
+        //memanggil function untuk menampilkan isi list
+        SetUpGame();
+    }
+
+    //variabel untuk mengecek isi jika menekan button
+    string ClickedAnimal = string.Empty;
+    string clickedAnimalDescription = string.Empty;
+
+    //variabel untuk mengecek selesainya game agar bisa di restart kembali
+    int animalFound = 0;
+
+    //function untuk mengirim parameter ke event di button
+    private void ButtonCLick(string animal, string animaDescription)
+    {
+        //mengecek jika diklik kosong, maka akan diisi oleh animal
+        if(ClickedAnimal == string.Empty)
+        {
+            ClickedAnimal = animal;
+            clickedAnimalDescription = animaDescription;
+        } 
+        //jika gambar yg diklik sama dan tidak bisa mengklik dibutton yg sama
+        else if(ClickedAnimal == animal && clickedAnimalDescription != animaDescription)
+        {
+            shuffledAnimals = shuffledAnimals
+            .Select(item => item.Replace(animal, string.Empty))
+            .ToList();
+
+            ClickedAnimal = string.Empty;
+
+            //mengincrement variabel untuk mengecek selesainya game agar bisa di restart kembali
+            animalFound++;
+
+            //mengecek apakah variabel tersebut sama dengan 8(jumlah isi list)
+            if(animalFound == 8)
+            {
+                //merestart/me-run ulang
+                SetUpGame();
+            }
+        }
+        else
+        {
+            //mengosongkan isi variabel tersebut
+            ClickedAnimal = string.Empty;
+        }
+    }
+}
